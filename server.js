@@ -65,22 +65,28 @@ const processData = (data) => {
 
     const group = `${text} ${key.split("-")[0]}`;
 
-    if (!groupCountObj[group])
-      groupCountObj[group] = 0;
+    if (!groupCountObj[group]) groupCountObj[group] = 0;
     if (data[key].match(/Có/)) groupCountObj[group] = groupCountObj[group] + 1;
   });
 
-  return groupCountObj
+  return groupCountObj;
 };
 
-analyzeData.map(value => {
-  console.log(`Name: ${value['Họ và tên']}`)
-  console.log(`Email: ${value['Email']}`)
-  console.log(`Age: ${value['Tuổi']}`)
+const resultData = analyzeData.map((value) => {
+  return {
+    name: value["Họ và tên"],
+    email: value["Email"],
+    age: value["Tuổi"],
+    ...processData(value),
+  };
+});
 
-  const result  = processData(value)
-  Object.keys(result).map(key => {
-    console.log(`${key}: ${result[key]}`)
-  })
-  console.log('----------------------')
-})
+const finalHeaders = Object.keys(resultData[0]).map((key) => key);
+
+// Export To Excel
+let ws = XLSX.utils.json_to_sheet(resultData, {header: finalHeaders});
+let wb = XLSX.utils.book_new()
+XLSX.utils.book_append_sheet(wb, ws, "SheetJS")
+let exportFileName = `workbook.xlsx`;
+XLSX.writeFile(wb, exportFileName)
+
